@@ -189,6 +189,8 @@ PODS:
     - React-cxxreact (= 0.61.5)
     - React-jsi (= 0.61.5)
   - React-jsinspector (0.61.5)
+  - react-native-blur (0.8.0):
+    - React
   - react-native-get-random-values (1.4.0):
     - React
   - react-native-keyboard-aware-scroll-view (0.8.8):
@@ -266,6 +268,7 @@ DEPENDENCIES:
   - React-jsi (from `../../../node_modules/react-native/ReactCommon/jsi`)
   - React-jsiexecutor (from `../../../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../../../node_modules/react-native/ReactCommon/jsinspector`)
+  - "react-native-blur (from `../../../node_modules/@react-native-community/blur`)"
   - react-native-get-random-values (from `../../../node_modules/react-native-get-random-values`)
   - react-native-keyboard-aware-scroll-view (from `../../../node_modules/react-native-keyboard-aware-scroll-view`)
   - react-native-safe-area (from `../../../node_modules/react-native-safe-area`)
@@ -285,12 +288,12 @@ DEPENDENCIES:
   - ReactNativeDarkMode (from `../../../node_modules/react-native-dark-mode`)
   - RNSVG (from `../../../node_modules/react-native-svg`)
   - RNTAztecView (from `../../react-native-aztec/RNTAztecView.podspec`)
+  - WordPress-Aztec-iOS (from `https://github.com/wordpress-mobile/WordPress-Aztec-iOS.git`, commit `9187001a9c6dc84c211937b1b5a2af2a8b8d54a9`)
   - Yoga (from `../../../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
   trunk:
     - boost-for-react-native
-    - WordPress-Aztec-iOS
 
 EXTERNAL SOURCES:
   BVLinearGradient:
@@ -325,6 +328,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native/ReactCommon/jsiexecutor"
   React-jsinspector:
     :path: "../../../node_modules/react-native/ReactCommon/jsinspector"
+  react-native-blur:
+    :path: "../../../node_modules/@react-native-community/blur"
   react-native-get-random-values:
     :path: "../../../node_modules/react-native-get-random-values"
   react-native-keyboard-aware-scroll-view:
@@ -361,8 +366,16 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native-svg"
   RNTAztecView:
     :path: "../../react-native-aztec/RNTAztecView.podspec"
+  WordPress-Aztec-iOS:
+    :commit: 9187001a9c6dc84c211937b1b5a2af2a8b8d54a9
+    :git: https://github.com/wordpress-mobile/WordPress-Aztec-iOS.git
   Yoga:
     :path: "../../../node_modules/react-native/ReactCommon/yoga"
+
+CHECKOUT OPTIONS:
+  WordPress-Aztec-iOS:
+    :commit: 9187001a9c6dc84c211937b1b5a2af2a8b8d54a9
+    :git: https://github.com/wordpress-mobile/WordPress-Aztec-iOS.git
 
 SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
@@ -382,6 +395,7 @@ SPEC CHECKSUMS:
   React-jsi: cb2cd74d7ccf4cffb071a46833613edc79cdf8f7
   React-jsiexecutor: d5525f9ed5f782fdbacb64b9b01a43a9323d2386
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
+  react-native-blur: cad4d93b364f91e7b7931b3fa935455487e5c33c
   react-native-get-random-values: 8940331a943a46c165d3ed05802c09c392f8dd46
   react-native-keyboard-aware-scroll-view: ffa9152671fec9a571197ed2d02e0fcb90206e60
   react-native-safe-area: e8230b0017d76c00de6b01e2412dcf86b127c6a3
@@ -403,6 +417,6 @@ SPEC CHECKSUMS:
   WordPress-Aztec-iOS: d01bf0c5e150ae6a046f06ba63b7cc2762061c0b
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
 
-PODFILE CHECKSUM: c8a36f1dc00b0194bc4eb8fad6ae0c674a2dfd2b
+PODFILE CHECKSUM: 0064bfb6384f9b3d6c15119c39ae4e6ffc9658da
 
 COCOAPODS: 1.8.4
