@@ -46,7 +46,7 @@ module.exports = async function start( { spinner, debug } ) {
 	const config = await initConfig( { spinner, debug } );
 
 	const workDirectoryPath = config.workDirectoryPath;
-	const metaChanged = await didCacheChange( 'config', md5( config ), {
+	const shouldConfigureWp = await didCacheChange( 'config', md5( config ), {
 		workDirectoryPath,
 	} );
 
@@ -61,7 +61,7 @@ module.exports = async function start( { spinner, debug } ) {
 	 *
 	 * @see https://github.com/WordPress/gutenberg/pull/20253#issuecomment-587228440
 	 */
-	if ( metaChanged ) {
+	if ( shouldConfigureWp ) {
 		await stop( { spinner, debug } );
 	}
 
@@ -94,7 +94,7 @@ module.exports = async function start( { spinner, debug } ) {
 	}
 
 	// Only run WordPress install/configuration when config has changed.
-	if ( metaChanged ) {
+	if ( shouldConfigureWp ) {
 		try {
 			await checkDatabaseConnection( config );
 		} catch ( error ) {
@@ -118,7 +118,7 @@ module.exports = async function start( { spinner, debug } ) {
 			} ),
 		] );
 
-		// Set the meta key once everything has been configured.
+		// Set the cache key once everything has been configured.
 		await setCache( 'config', md5( config ), {
 			workDirectoryPath,
 		} );
