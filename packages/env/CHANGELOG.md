@@ -13,7 +13,7 @@
 
 ### Bug Fixes
 
--   `wp-env start` performance is now 2x faster after first install.
+-   `wp-env start` is significantly faster after first install.
 
 ## 1.6.0-rc.0 (2020-06-24)
 
