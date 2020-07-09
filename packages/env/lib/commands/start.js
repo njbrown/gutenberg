@@ -26,7 +26,7 @@ const {
 	configureWordPress,
 	setupWordPressDirectories,
 } = require( '../wordpress' );
-const { didMetaChange, setMeta } = require( '../meta' );
+const { didCacheChange, setCache } = require( '../cache' );
 const md5 = require( '../md5' );
 
 /**
@@ -46,7 +46,7 @@ module.exports = async function start( { spinner, debug } ) {
 	const config = await initConfig( { spinner, debug } );
 
 	const workDirectoryPath = config.workDirectoryPath;
-	const metaChanged = await didMetaChange( 'config', md5( config ), {
+	const metaChanged = await didCacheChange( 'config', md5( config ), {
 		workDirectoryPath,
 	} );
 
@@ -119,7 +119,7 @@ module.exports = async function start( { spinner, debug } ) {
 		] );
 
 		// Set the meta key once everything has been configured.
-		await setMeta( 'config', md5( config ), {
+		await setCache( 'config', md5( config ), {
 			workDirectoryPath,
 		} );
 	}
