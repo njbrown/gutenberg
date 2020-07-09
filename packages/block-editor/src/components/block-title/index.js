@@ -2,7 +2,10 @@
  * WordPress dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { getBlockType } from '@wordpress/blocks';
+import {
+	getBlockType,
+	__experimentalGetBlockLabel as getBlockLabel,
+} from '@wordpress/blocks';
 
 /**
  * Renders the block's configured title as a string, or empty if the title
@@ -20,13 +23,18 @@ import { getBlockType } from '@wordpress/blocks';
  * @return {?string} Block title.
  */
 export default function BlockTitle( { clientId } ) {
-	const name = useSelect(
+	const { attributes, name } = useSelect(
 		( select ) => {
 			if ( ! clientId ) {
 				return null;
 			}
-			const { getBlockName } = select( 'core/block-editor' );
-			return getBlockName( clientId );
+			const { getBlockName, getBlockAttributes } = select(
+				'core/block-editor'
+			);
+			return {
+				attributes: getBlockAttributes( clientId ),
+				name: getBlockName( clientId ),
+			};
 		},
 		[ clientId ]
 	);
@@ -40,5 +48,5 @@ export default function BlockTitle( { clientId } ) {
 		return null;
 	}
 
-	return blockType.title;
+	return getBlockLabel( blockType, attributes );
 }
