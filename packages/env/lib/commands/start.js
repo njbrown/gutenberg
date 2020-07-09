@@ -26,6 +26,8 @@ const {
 	configureWordPress,
 	setupWordPressDirectories,
 } = require( '../wordpress' );
+const { didMetaChange, setMeta } = require( '../meta' );
+const md5 = require( '../md5' );
 
 /**
  * @typedef {import('../config').Config} Config
@@ -39,6 +41,15 @@ const {
  * @param {boolean} options.debug   True if debug mode is enabled.
  */
 module.exports = async function start( { spinner, debug } ) {
+	await checkForLegacyInstall( spinner );
+
+	const config = await initConfig( { spinner, debug } );
+
+	const workDirectoryPath = config.workDirectoryPath;
+	const metaChanged = await didMetaChange( 'config', md5( config ), {
+		workDirectoryPath,
+	} );
+
 	/**
 	 * If the Docker image is already running and the `wp-env` files have been
 	 * deleted, the start command will not complete successfully. Stopping
@@ -50,11 +61,9 @@ module.exports = async function start( { spinner, debug } ) {
 	 *
 	 * @see https://github.com/WordPress/gutenberg/pull/20253#issuecomment-587228440
 	 */
-	await stop( { spinner, debug } );
-
-	await checkForLegacyInstall( spinner );
-
-	const config = await initConfig( { spinner, debug } );
+	if ( metaChanged ) {
+		await stop( { spinner, debug } );
+	}
 
 	spinner.text = 'Downloading WordPress.';
 
@@ -84,28 +93,36 @@ module.exports = async function start( { spinner, debug } ) {
 		] );
 	}
 
-	try {
-		await checkDatabaseConnection( config );
-	} catch ( error ) {
-		// Wait 30 seconds for MySQL to accept connections.
-		await retry( () => checkDatabaseConnection( config ), {
-			times: 30,
-			delay: 1000,
+	// Only run WordPress install/configuration when config has changed.
+	if ( metaChanged ) {
+		try {
+			await checkDatabaseConnection( config );
+		} catch ( error ) {
+			// Wait 30 seconds for MySQL to accept connections.
+			await retry( () => checkDatabaseConnection( config ), {
+				times: 30,
+				delay: 1000,
+			} );
+
+			// It takes 3-4 seconds for MySQL to be ready after it starts accepting connections.
+			await sleep( 4000 );
+		}
+
+		// Retry WordPress installation in case MySQL *still* wasn't ready.
+		await Promise.all( [
+			retry( () => configureWordPress( 'development', config, spinner ), {
+				times: 2,
+			} ),
+			retry( () => configureWordPress( 'tests', config, spinner ), {
+				times: 2,
+			} ),
+		] );
+
+		// Set the meta key once everything has been configured.
+		await setMeta( 'config', md5( config ), {
+			workDirectoryPath,
 		} );
-
-		// It takes 3-4 seconds for MySQL to be ready after it starts accepting connections.
-		await sleep( 4000 );
 	}
-
-	// Retry WordPress installation in case MySQL *still* wasn't ready.
-	await Promise.all( [
-		retry( () => configureWordPress( 'development', config, spinner ), {
-			times: 2,
-		} ),
-		retry( () => configureWordPress( 'tests', config, spinner ), {
-			times: 2,
-		} ),
-	] );
 
 	spinner.text = 'WordPress started.';
 };
