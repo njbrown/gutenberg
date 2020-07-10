@@ -32,6 +32,7 @@ const md5 = require( '../md5' );
 /**
  * @typedef {import('../config').Config} Config
  */
+const CONFIG_CACHE_KEY = 'config_checksum';
 
 /**
  * Starts the development server.
@@ -39,16 +40,20 @@ const md5 = require( '../md5' );
  * @param {Object}  options
  * @param {Object}  options.spinner A CLI spinner which indicates progress.
  * @param {boolean} options.debug   True if debug mode is enabled.
+ * @param {boolean} options.update  If true, update sources.
  */
-module.exports = async function start( { spinner, debug } ) {
+module.exports = async function start( { spinner, debug, update } ) {
+	spinner.text = 'Reading configuration.';
 	await checkForLegacyInstall( spinner );
 
 	const config = await initConfig( { spinner, debug } );
 
 	const workDirectoryPath = config.workDirectoryPath;
-	const shouldConfigureWp = await didCacheChange( 'config', md5( config ), {
-		workDirectoryPath,
-	} );
+	const shouldConfigureWp =
+		update ||
+		( await didCacheChange( CONFIG_CACHE_KEY, md5( config ), {
+			workDirectoryPath,
+		} ) );
 
 	/**
 	 * If the Docker image is already running and the `wp-env` files have been
@@ -65,18 +70,16 @@ module.exports = async function start( { spinner, debug } ) {
 		await stop( { spinner, debug } );
 	}
 
-	spinner.text = 'Downloading WordPress.';
+	await dockerCompose.upOne( 'mysql', {
+		config: config.dockerComposeConfigPath,
+		log: config.debug,
+	} );
 
-	await Promise.all( [
-		// Preemptively start the database while we wait for sources to download.
-		dockerCompose.upOne( 'mysql', {
-			config: config.dockerComposeConfigPath,
-			log: config.debug,
-		} ),
-		downloadSources( config, spinner ),
-	] );
-
-	await setupWordPressDirectories( config );
+	if ( shouldConfigureWp ) {
+		spinner.text = 'Downloading sources.';
+		await downloadSources( config, spinner );
+		await setupWordPressDirectories( config );
+	}
 
 	spinner.text = 'Starting WordPress.';
 
@@ -85,16 +88,18 @@ module.exports = async function start( { spinner, debug } ) {
 		log: config.debug,
 	} );
 
-	if ( config.coreSource === null ) {
-		// Don't chown wp-content when it exists on the user's local filesystem.
-		await Promise.all( [
-			makeContentDirectoriesWritable( 'development', config ),
-			makeContentDirectoriesWritable( 'tests', config ),
-		] );
-	}
-
 	// Only run WordPress install/configuration when config has changed.
 	if ( shouldConfigureWp ) {
+		spinner.text = 'Configuring WordPress.';
+
+		if ( config.coreSource === null ) {
+			// Don't chown wp-content when it exists on the user's local filesystem.
+			await Promise.all( [
+				makeContentDirectoriesWritable( 'development', config ),
+				makeContentDirectoriesWritable( 'tests', config ),
+			] );
+		}
+
 		try {
 			await checkDatabaseConnection( config );
 		} catch ( error ) {
@@ -119,7 +124,7 @@ module.exports = async function start( { spinner, debug } ) {
 		] );
 
 		// Set the cache key once everything has been configured.
-		await setCache( 'config', md5( config ), {
+		await setCache( CONFIG_CACHE_KEY, md5( config ), {
 			workDirectoryPath,
 		} );
 	}
