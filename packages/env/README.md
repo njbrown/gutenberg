@@ -174,7 +174,7 @@ $ wp-env start
 
 ### `wp-env start`
 
-The start command installs and initalizes the WordPress environment, which includes downloading any specified remote sources. By default, `wp-env` will not update or re-configure WordPress except when the configuration file changes. Tell `wp-env` to update sources and apply the configuration options again with `wp-env start --update`.
+The start command installs and initalizes the WordPress environment, which includes downloading any specified remote sources. By default, `wp-env` will not update or re-configure the environment except when the configuration file changes. Tell `wp-env` to update sources and apply the configuration options again with `wp-env start --update`. This will not overrwrite any existing content.
 
 ```sh
 wp-env start
